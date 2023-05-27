@@ -11,8 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TrainService {
@@ -22,15 +21,40 @@ public class TrainService {
 
     public Integer addTrain(AddTrainEntryDto trainEntryDto){
 
+        String route = "";
+        List<Station> stationList = trainEntryDto.getStationRoute();
+        for(int i=0;i<stationList.size();i++){
+            if(i==stationList.size()-1){
+                route+=stationList.get(i);
+            }
+            else{
+                route += stationList.get(i) + ",";
+            }
+        }
+        Train train = new Train(route,trainEntryDto.getDepartureTime(),trainEntryDto.getNoOfSeats());
+
+        Train savedtrain = trainRepository.save(train);
         //Add the train to the trainRepository
         //and route String logic to be taken from the Problem statement.
         //Save the train and return the trainId that is generated from the database.
         //Avoid using the lombok library
-        return null;
+        return savedtrain.getTrainId();
     }
 
     public Integer calculateAvailableSeats(SeatAvailabilityEntryDto seatAvailabilityEntryDto){
-
+          Train train= trainRepository.findById(seatAvailabilityEntryDto.getTrainId()).get();
+          int total = train.getNoOfSeats();
+           HashMap<String,Integer> hm = routeToHashMap(train.getRoute());
+           int strt = hm.get(seatAvailabilityEntryDto.getFromStation().name());
+           int end = hm.get(seatAvailabilityEntryDto.getToStation().name());
+           int filledSeat =0;
+            for(Ticket ticket: train.getBookedTickets()){
+            if((hm.get(ticket.getFromStation().name())>=strt && hm.get(ticket.getFromStation().name())<=end)
+                    || (hm.get(ticket.getToStation().name())<=end && hm.get(ticket.getToStation().name())>=strt)){
+                filledSeat++;
+            }
+        }
+        return total-filledSeat;
         //Calculate the total seats available
         //Suppose the route is A B C D
         //And there are 2 seats avaialble in total in the train
@@ -39,8 +63,15 @@ public class TrainService {
         //even if that seat is booked post the destStation or before the boardingStation
         //Inshort : a train has totalNo of seats and there are tickets from and to different locations
         //We need to find out the available seats between the given 2 stations.
+    }
 
-       return null;
+    public HashMap<String, Integer> routeToHashMap(String route) {
+        HashMap<String,Integer> hm = new HashMap<>();
+        String arr[] = route.split(",");
+        for(int i=0;i< arr.length;i++) {
+            hm.put(arr[i], i);
+        }
+        return hm;
     }
 
     public Integer calculatePeopleBoardingAtAStation(Integer trainId,Station station) throws Exception{
@@ -49,7 +80,6 @@ public class TrainService {
         //if the trainId is not passing through that station
         //throw new Exception("Train is not passing from this station");
         //  in a happy case we need to find out the number of such people.
-
 
         return 0;
     }

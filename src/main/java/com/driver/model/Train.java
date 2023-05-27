@@ -15,6 +15,12 @@ import java.util.List;
 @Entity
 @Table(name = "trains")
 public class Train {
+    public Train(String route,LocalTime departureTime, int noOfSeats) {
+        this.route = route;
+        this.departureTime = departureTime;
+        this.noOfSeats = noOfSeats;
+        bookedTickets=new ArrayList<>();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

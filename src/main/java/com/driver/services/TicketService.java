@@ -2,6 +2,7 @@ package com.driver.services;
 
 
 import com.driver.EntryDto.BookTicketEntryDto;
+import com.driver.EntryDto.SeatAvailabilityEntryDto;
 import com.driver.model.Passenger;
 import com.driver.model.Ticket;
 import com.driver.model.Train;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -26,8 +28,36 @@ public class TicketService {
     @Autowired
     PassengerRepository passengerRepository;
 
+    @Autowired
+    TrainService trainService;
+
 
     public Integer bookTicket(BookTicketEntryDto bookTicketEntryDto)throws Exception{
+     Train train = trainRepository.findById(bookTicketEntryDto.getTrainId()).get();
+     HashMap<String,Integer> hm  = trainService.routeToHashMap(train.getRoute());
+     if(!hm.containsKey(bookTicketEntryDto.getFromStation().name()) || !hm.containsKey(bookTicketEntryDto.getToStation())){
+         throw new Exception("Invalid stations");
+     }
+
+     SeatAvailabilityEntryDto seatAvailabilityEntryDto = new SeatAvailabilityEntryDto(bookTicketEntryDto.getTrainId(),bookTicketEntryDto.getFromStation(),bookTicketEntryDto.getToStation());
+     int SeatsAvailable = trainService.calculateAvailableSeats(seatAvailabilityEntryDto);
+     int updateSeats = SeatsAvailable-bookTicketEntryDto.getNoOfSeats();
+     if(updateSeats<=0){
+          throw new Exception("Less tickets are available");
+     }
+     int btwStations = hm.get(bookTicketEntryDto.getToStation().name())-hm.get(bookTicketEntryDto.getFromStation())+1;
+     int totalfare = ((btwStations-1)*300)*bookTicketEntryDto.getNoOfSeats();
+
+     List<Integer> passengerId = bookTicketEntryDto.getPassengerIds();
+     List<Passenger> passengers = new ArrayList<>();
+     for (Integer x:passengerId){
+          passengers.add(passengerRepository.findById(x).get());
+     }
+     Ticket ticket = new Ticket(0,passengers,train,bookTicketEntryDto.getFromStation(),bookTicketEntryDto.getToStation(),totalfare);
+     Ticket savedTicket = ticketRepository.save(ticket);
+     Passenger passenger = passengerRepository.findById(bookTicketEntryDto.getBookingPersonId()).get();
+     passenger.getBookedTickets().add(ticket);
+     train.getBookedTickets().add(ticket);
 
         //Check for validity
         //Use bookedTickets List from the TrainRepository to get bookings done against that train
@@ -42,7 +72,7 @@ public class TicketService {
         //Also in the passenger Entity change the attribute bookedTickets by using the attribute bookingPersonId.
        //And the end return the ticketId that has come from db
 
-       return null;
+        return savedTicket.getTicketId();
 
     }
 }
