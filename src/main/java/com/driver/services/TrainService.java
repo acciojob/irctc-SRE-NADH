@@ -47,6 +47,9 @@ public class TrainService {
           Train train= trainRepository.findById(seatAvailabilityEntryDto.getTrainId()).get();
           int total = train.getNoOfSeats();
            HashMap<String,Integer> hm = routeToHashMap(train.getRoute());
+           if((!hm.containsKey(seatAvailabilityEntryDto.getFromStation().name())) || (!hm.containsKey(seatAvailabilityEntryDto.getToStation().name()))){
+               return 0;
+           }
            int strt = hm.get(seatAvailabilityEntryDto.getFromStation().name());
            int end = hm.get(seatAvailabilityEntryDto.getToStation().name());
            int filledSeat =0;
