@@ -48,8 +48,8 @@ public class TicketService {
      if(updateSeats<=0){
           throw new Exception("Less tickets are available");
      }
-     int btwStations = hm.get(bookTicketEntryDto.getToStation().name())-hm.get(bookTicketEntryDto.getFromStation().name())+1;
-     int totalfare = ((btwStations-1)*300);
+     int btwStations = hm.get(bookTicketEntryDto.getToStation().name())-hm.get(bookTicketEntryDto.getFromStation().name());
+     int totalfare = ((btwStations)*300);
 
      List<Integer> passengerId = bookTicketEntryDto.getPassengerIds();
      List<Passenger> passengers = new ArrayList<>();
@@ -62,7 +62,6 @@ public class TicketService {
      Passenger passenger = passengerRepository.findById(bookTicketEntryDto.getBookingPersonId()).get();
      passenger.getBookedTickets().add(ticket);
      train.getBookedTickets().add(ticket);
-     train.setNoOfSeats(updateSeats);
      Ticket savedTicket = ticketRepository.save(ticket);
 
         //Check for validity

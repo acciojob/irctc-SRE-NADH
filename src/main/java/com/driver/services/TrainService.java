@@ -52,8 +52,9 @@ public class TrainService {
            int filledSeat =0;
             for(Ticket ticket: train.getBookedTickets()){
             if((hm.get(ticket.getFromStation().name())>=strt && hm.get(ticket.getFromStation().name())<end)
-                    || (hm.get(ticket.getToStation().name())<=end && hm.get(ticket.getToStation().name())>strt)){
-                filledSeat++;
+                    || (hm.get(ticket.getToStation().name())<=end && hm.get(ticket.getToStation().name())>strt)
+           || (hm.get(ticket.getFromStation().name())<=strt && hm.get(ticket.getToStation().name())>=end)){
+                filledSeat+=ticket.getPassengersList().size();
             }
         }
         return total-filledSeat;
