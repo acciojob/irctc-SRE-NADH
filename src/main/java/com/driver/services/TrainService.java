@@ -7,9 +7,11 @@ import com.driver.model.Station;
 import com.driver.model.Ticket;
 import com.driver.model.Train;
 import com.driver.repository.TrainRepository;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -76,32 +78,74 @@ public class TrainService {
 
     public Integer calculatePeopleBoardingAtAStation(Integer trainId,Station station) throws Exception{
 
+        Train train = trainRepository.findById(trainId).get();
+
+        String route = train.getRoute();
+
+        HashMap<String, Integer> hm = routeToHashMap(route);
+
+        if(!hm.containsKey(station.name())){
+            throw  new Exception("Train is not passing from this station");
+        }
+        int ans=0;
+        List<Ticket> tickets = train.getBookedTickets();
+        for(Ticket ticket:tickets){
+            if(ticket.getFromStation().equals(station)){
+                ans+=ticket.getPassengersList().size();
+            }
+        }
         //We need to find out the number of people who will be boarding a train from a particular station
         //if the trainId is not passing through that station
         //throw new Exception("Train is not passing from this station");
         //  in a happy case we need to find out the number of such people.
 
-        return 0;
+        return ans;
     }
 
     public Integer calculateOldestPersonTravelling(Integer trainId){
 
+        Train train = trainRepository.findById(trainId).get();
+        if(train.getBookedTickets().size()==0){
+            return 0;
+        }
+        int max = Integer.MIN_VALUE;
+        List<Ticket> tickets = train.getBookedTickets();
+        for(Ticket ticket:tickets){
+            List<Passenger> passengers = ticket.getPassengersList();
+            for(Passenger passenger: passengers){
+                if(passenger.getAge()>max){
+                    max=passenger.getAge();
+                }
+            }
+        }
         //Throughout the journey of the train between any 2 stations
         //We need to find out the age of the oldest person that is travelling the train
         //If there are no people travelling in that train you can return 0
-
-        return 0;
+        return max;
     }
 
     public List<Integer> trainsBetweenAGivenTime(Station station, LocalTime startTime, LocalTime endTime){
+     List<Train> trainList = trainRepository.findAll();
 
+     int strtMin = (startTime.getHour()*60)+startTime.getMinute();
+     int endMin =(endTime.getHour()*60)+endTime.getMinute();
+     List<Integer> ans = new ArrayList<>();
+     for(Train train:trainList){
+         HashMap<String,Integer> hm = routeToHashMap(train.getRoute());
+         if(!hm.containsKey(station.name())) continue;
+       LocalTime traintime=train.getDepartureTime();
+       int departTime = traintime.getHour()*60+traintime.getMinute();
+           int reachTime = (hm.get(station.name())*60)+departTime;
+           if(reachTime>=strtMin && reachTime<=endMin){
+               ans.add(train.getTrainId());
+           }
+     }
         //When you are at a particular station you need to find out the number of trains that will pass through a given station
         //between a particular time frame both start time and end time included.
         //You can assume that the date change doesn't need to be done ie the travel will certainly happen with the same date (More details
         //in problem statement)
         //You can also assume the seconds and milli seconds value will be 0 in a LocalTime format.
-
-        return null;
+        return ans;
     }
 
 }
