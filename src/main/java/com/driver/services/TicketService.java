@@ -62,6 +62,7 @@ public class TicketService {
      Passenger passenger = passengerRepository.findById(bookTicketEntryDto.getBookingPersonId()).get();
      passenger.getBookedTickets().add(ticket);
      train.getBookedTickets().add(ticket);
+     train.setNoOfSeats(updateSeats);
      Ticket savedTicket = ticketRepository.save(ticket);
 
         //Check for validity
