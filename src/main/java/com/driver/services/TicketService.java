@@ -39,14 +39,14 @@ public class TicketService {
 //        System.out.println(x);
 //    }
      if((!hm.containsKey(bookTicketEntryDto.getFromStation().name())) || (!hm.containsKey(bookTicketEntryDto.getToStation().name()))){
-         throw new Exception();
+         throw new Exception("Invalid stations");
      }
 
      SeatAvailabilityEntryDto seatAvailabilityEntryDto = new SeatAvailabilityEntryDto(bookTicketEntryDto.getTrainId(),bookTicketEntryDto.getFromStation(),bookTicketEntryDto.getToStation());
      int SeatsAvailable = trainService.calculateAvailableSeats(seatAvailabilityEntryDto);
      int updateSeats = SeatsAvailable-bookTicketEntryDto.getNoOfSeats();
      if(updateSeats<=0){
-          throw new Exception();
+          throw new Exception("Less tickets are available");
      }
      int btwStations = hm.get(bookTicketEntryDto.getToStation().name())-hm.get(bookTicketEntryDto.getFromStation().name())+1;
      int totalfare = ((btwStations-1)*300);
