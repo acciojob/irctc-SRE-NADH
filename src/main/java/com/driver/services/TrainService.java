@@ -71,7 +71,7 @@ public class TrainService {
         //We need to find out the available seats between the given 2 stations.
     }
 
-    public HashMap<String, Integer> routeToHashMap(String route) {
+    public static HashMap<String, Integer> routeToHashMap(String route) {
         HashMap<String,Integer> hm = new HashMap<>();
         String arr[] = route.split(",");
         for(int i=0;i< arr.length;i++) {

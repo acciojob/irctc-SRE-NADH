@@ -28,13 +28,10 @@ public class TicketService {
     @Autowired
     PassengerRepository passengerRepository;
 
-    @Autowired
-    TrainService trainService;
-
 
     public Integer bookTicket(BookTicketEntryDto bookTicketEntryDto)throws Exception{
      Train train = trainRepository.findById(bookTicketEntryDto.getTrainId()).get();
-     HashMap<String,Integer> hm  = trainService.routeToHashMap(train.getRoute());
+        HashMap<String,Integer> hm  = TrainService.routeToHashMap(train.getRoute());
 //    for(String x:hm.keySet()){
 //        System.out.println(x);
 //    }
@@ -42,8 +39,24 @@ public class TicketService {
          throw new Exception("Invalid stations");
      }
 
-     SeatAvailabilityEntryDto seatAvailabilityEntryDto = new SeatAvailabilityEntryDto(bookTicketEntryDto.getTrainId(),bookTicketEntryDto.getFromStation(),bookTicketEntryDto.getToStation());
-     int SeatsAvailable = trainService.calculateAvailableSeats(seatAvailabilityEntryDto);
+
+        int total = train.getNoOfSeats();
+        int strt = hm.get(bookTicketEntryDto.getFromStation().toString());
+        int end = hm.get(bookTicketEntryDto.getToStation().toString());
+        int filledSeat =0;
+        for(Ticket ticket: train.getBookedTickets()){
+            if((hm.get(ticket.getFromStation().toString())>=strt && hm.get(ticket.getFromStation().toString())<end)
+                    || (hm.get(ticket.getToStation().toString())<=end && hm.get(ticket.getToStation().toString())>strt)
+                    || (hm.get(ticket.getFromStation().toString())<=strt && hm.get(ticket.getToStation().toString())>=end)){
+                filledSeat+=ticket.getPassengersList().size();
+            }
+        }
+        int SeatsAvailable= total-filledSeat;
+
+
+
+
+
      int updateSeats = SeatsAvailable-bookTicketEntryDto.getNoOfSeats();
      if(updateSeats<=0){
           throw new Exception("Less tickets are available");
@@ -76,7 +89,6 @@ public class TicketService {
         //Save the bookedTickets in the train Object
         //Also in the passenger Entity change the attribute bookedTickets by using the attribute bookingPersonId.
        //And the end return the ticketId that has come from db
-
         return savedTicket.getTicketId();
 
     }
