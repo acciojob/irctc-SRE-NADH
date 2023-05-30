@@ -47,16 +47,16 @@ public class TrainService {
           Train train= trainRepository.findById(seatAvailabilityEntryDto.getTrainId()).get();
           int total = train.getNoOfSeats();
            HashMap<String,Integer> hm = routeToHashMap(train.getRoute());
-           if((!hm.containsKey(seatAvailabilityEntryDto.getFromStation().name())) || (!hm.containsKey(seatAvailabilityEntryDto.getToStation().name()))){
+           if((!hm.containsKey(seatAvailabilityEntryDto.getFromStation().toString())) || (!hm.containsKey(seatAvailabilityEntryDto.getToStation().toString()))){
                return 0;
            }
-           int strt = hm.get(seatAvailabilityEntryDto.getFromStation().name());
-           int end = hm.get(seatAvailabilityEntryDto.getToStation().name());
+           int strt = hm.get(seatAvailabilityEntryDto.getFromStation().toString());
+           int end = hm.get(seatAvailabilityEntryDto.getToStation().toString());
            int filledSeat =0;
             for(Ticket ticket: train.getBookedTickets()){
-            if((hm.get(ticket.getFromStation().name())>=strt && hm.get(ticket.getFromStation().name())<end)
-                    || (hm.get(ticket.getToStation().name())<=end && hm.get(ticket.getToStation().name())>strt)
-           || (hm.get(ticket.getFromStation().name())<=strt && hm.get(ticket.getToStation().name())>=end)){
+            if((hm.get(ticket.getFromStation().toString())>=strt && hm.get(ticket.getFromStation().toString())<end)
+                    || (hm.get(ticket.getToStation().toString())<=end && hm.get(ticket.getToStation().toString())>strt)
+           || (hm.get(ticket.getFromStation().toString())<=strt && hm.get(ticket.getToStation().toString())>=end)){
                 filledSeat+=ticket.getPassengersList().size();
             }
         }
@@ -88,7 +88,7 @@ public class TrainService {
 
         HashMap<String, Integer> hm = routeToHashMap(route);
 
-        if(!hm.containsKey(station.name())){
+        if(!hm.containsKey(station.toString())){
             throw  new Exception("Train is not passing from this station");
         }
         int ans=0;
@@ -136,10 +136,10 @@ public class TrainService {
      List<Integer> ans = new ArrayList<>();
      for(Train train:trainList){
          HashMap<String,Integer> hm = routeToHashMap(train.getRoute());
-         if(!hm.containsKey(station.name())) continue;
+         if(!hm.containsKey(station.toString())) continue;
        LocalTime traintime=train.getDepartureTime();
        int departTime = traintime.getHour()*60+traintime.getMinute();
-           int reachTime = (hm.get(station.name())*60)+departTime;
+           int reachTime = (hm.get(station.toString())*60)+departTime;
            if(reachTime>=strtMin && reachTime<=endMin){
                ans.add(train.getTrainId());
            }

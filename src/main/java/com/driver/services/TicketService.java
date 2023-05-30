@@ -38,7 +38,7 @@ public class TicketService {
 //    for(String x:hm.keySet()){
 //        System.out.println(x);
 //    }
-     if((!hm.containsKey(bookTicketEntryDto.getFromStation().name())) || (!hm.containsKey(bookTicketEntryDto.getToStation().name()))){
+     if((!hm.containsKey(bookTicketEntryDto.getFromStation().toString())) || (!hm.containsKey(bookTicketEntryDto.getToStation().toString()))){
          throw new Exception("Invalid stations");
      }
 
@@ -48,7 +48,7 @@ public class TicketService {
      if(updateSeats<=0){
           throw new Exception("Less tickets are available");
      }
-     int btwStations = hm.get(bookTicketEntryDto.getToStation().name())-hm.get(bookTicketEntryDto.getFromStation().name());
+     int btwStations = hm.get(bookTicketEntryDto.getToStation().toString())-hm.get(bookTicketEntryDto.getFromStation().toString());
      int totalfare = ((btwStations)*300);
 
      List<Integer> passengerId = bookTicketEntryDto.getPassengerIds();
